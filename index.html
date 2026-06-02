@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinic Price Checker (Dual Language)</title>
+  <!-- Tailwind CSS for clean styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4 antialiased font-sans">
+
+  <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-md relative transition-all duration-300">
+    
+    <!-- Language Switcher Toggle Buttons -->
+    <div class="absolute top-6 right-6 flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+      <button id="lang-en" onclick="changeLanguage('en')" class="px-3 py-1 text-xs font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600">EN</button>
+      <button id="lang-bm" onclick="changeLanguage('bm')" class="px-3 py-1 text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800">BM</button>
+    </div>
+
+    <!-- Header Icon & Titles -->
+    <div class="text-center mb-8 mt-4">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 mb-3 text-2xl">
+        🩺
+      </div>
+      <h1 id="ui-title" class="text-2xl font-bold text-slate-800">Clinic Price Checker</h1>
+      <p id="ui-subtitle" class="text-sm text-slate-500 mt-1">Select your pet's details below to view automated pricing estimates.</p>
+    </div>
+    
+    <!-- Step 1: Pet Selection -->
+    <div class="mb-5">
+      <label id="ui-step1" class="block font-semibold text-slate-700 text-sm mb-2">1. Select Pet Type</label>
+      <div class="grid grid-cols-2 gap-3">
+        <button id="btn-cat" onclick="selectPet('cat')" class="flex flex-col items-center justify-center p-4 border-2 border-slate-200 rounded-2xl bg-white hover:border-blue-500 hover:bg-blue-50/30 transition-all text-slate-700 font-medium">
+          <span class="text-2xl mb-1">🐱</span> <span id="ui-catText">Cat</span>
+        </button>
+        <button id="btn-dog" onclick="selectPet('dog')" class="flex flex-col items-center justify-center p-4 border-2 border-slate-200 rounded-2xl bg-white hover:border-blue-500 hover:bg-blue-50/30 transition-all text-slate-700 font-medium">
+          <span class="text-2xl mb-1">🐶</span> <span id="ui-dogText">Dog</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Service Selection Dropdown -->
+    <div class="mb-6">
+      <label id="ui-step2" class="block font-semibold text-slate-700 text-sm mb-2">2. Choose Service</label>
+      <select id="serviceSelect" onchange="displayFinalPrice()" class="w-full p-3.5 border-2 border-slate-200 rounded-xl bg-slate-50 text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-not-allowed" disabled>
+        <option id="ui-placeholder" value="">Select Pet Type First</option>
+      </select>
+    </div>
+
+    <!-- Price Card Display Window -->
+    <div id="priceCard" class="hidden bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-center shadow-lg shadow-blue-600/20 mb-6 scale-95 transition-all duration-300">
+      <p id="ui-priceLabel" class="text-xs uppercase tracking-widest text-blue-200 font-bold">Estimated Baseline Cost</p>
+      <p id="priceOutput" class="text-4xl font-black text-white mt-2">RM 0</p>
+    </div>
+
+    <!-- Booking WhatsApp Call to Action -->
+    <div id="bookingAction" class="hidden mb-6">
+      <a href="https://wa.me/YOUR_PHONE_NUMBER" target="_blank" id="ui-bookingBtn" class="w-full block text-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-4 rounded-xl shadow-md transition-colors text-sm">
+        💬 Tap here to Book Appointment on WhatsApp
+      </a>
+    </div>
+
+    <!-- Clinical Disclaimer Footer -->
+    <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl">
+      <p id="ui-disclaimer" class="text-xs text-slate-400 text-center leading-relaxed">
+        <strong>⚠️ Clinical Notice:</strong> Prices shown are starting estimates for standard procedures only. They do not include registration fees, mandatory pre-consultation physical exams, or extra medications. Final quotes are determined entirely by the attending vet.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Current application language state
+    let currentLang = 'en';
+    let selectedPetType = null;
+
+    // ==========================================
+    // 1. DATA TRANS-DICTIONS (UI TEXT ELEMENTS)
+    // ==========================================
+    const translations = {
+      en: {
+        title: "Clinic Price Checker",
+        subtitle: "Select your pet's details below to view automated pricing estimates.",
+        step1: "1. Select Pet Type",
+        step2: "2. Choose Service",
+        catText: "Cat",
+        dogText: "Dog",
+        placeholderEmpty: "Select Pet Type First",
+        placeholderActive: "-- Select Specific Service --",
+        priceLabel: "Estimated Baseline Cost",
+        bookingBtn: "💬 Tap here to Book Appointment on WhatsApp",
+        disclaimer: "<strong>⚠️ Clinical Notice:</strong> Prices shown are starting estimates for standard procedures only. They do not include registration fees, mandatory pre-consultation physical exams, or extra medications. Final quotes are determined entirely by the attending vet."
+      },
+      bm: {
+        title: "Semak Harga Klinik",
+        subtitle: "Pilih butiran haiwan kesayangan anda di bawah untuk melihat anggaran harga automatik.",
+        step1: "1. Pilih Jenis Haiwan",
+        step2: "2. Pilih Perkhidmatan",
+        catText: "Kucing",
+        dogText: "Anjing",
+        placeholderEmpty: "Pilih Jenis Haiwan Dahulu",
+        placeholderActive: "-- Pilih Perkhidmatan Spesifik --",
+        priceLabel: "Anggaran Kos Asas",
+        bookingBtn: "💬 Ketik di sini untuk Tempah Temujanji di WhatsApp",
+        disclaimer: "<strong>⚠️ Notis Klinikal:</strong> Harga yang dipaparkan adalah anggaran permulaan untuk prosedur standard sahaja. Tidak termasuk yuran pendaftaran, pemeriksaan fizikal pra-konsultasi wajib, atau ubat tambahan. Sebut harga akhir ditentukan sepenuhnya oleh doktor veterinar yang bertugas."
+      }
+    };
+
+    // ==========================================
+    // 2. CLINIC PRICING DATA CONFIGURATION
+    // You can customize English/Malay names and prices here!
+    // ==========================================
+    const clinicPricing = {
+      cat: [
+        { nameEn: "F3 Core Vaccination", nameBm: "Vaksinasi Teras F3", cost: "RM 50" },
+        { nameEn: "F4 Premium Vaccination", nameBm: "Vaksinasi Premium F4", cost: "RM 65" },
+        { nameEn: "Rabies Protection Shot", nameBm: "Suntikan Pencegahan Rabies", cost: "RM 60" },
+        { nameEn: "General Consultation Only", nameBm: "Konsultasi Am Sahaja", cost: "RM 35" }
+      ],
+      dog: [
+        { nameEn: "6-in-1 Core Vaccination", nameBm: "Vaksinasi Teras 6-dalam-1", cost: "RM 60" },
+        { nameEn: "9-in-1 Comprehensive Shot", nameBm: "Suntikan Komprehensif 9-dalam-1", cost: "RM 80" },
+        { nameEn: "Rabies Protection Shot", nameBm: "Suntikan Pencegahan Rabies", cost: "RM 60" },
+        { nameEn: "General Consultation Only", nameBm: "Konsultasi Am Sahaja", cost: "RM 35" }
+      ]
+    };
+
+    // Switch Language execution logic
+    function changeLanguage(lang) {
+      currentLang = lang;
+      
+      // Update visual style elements of language switch controls
+      const btnEn = document.getElementById('lang-en');
+      const btnBm = document.getElementById('lang-bm');
+      
+      if (lang === 'en') {
+        btnEn.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600";
+        btnBm.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800";
+      } else {
+        btnBm.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600";
+        btnEn.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800";
+      }
+
+      // Re-translate all basic static text blocks on the DOM layout
+      document.getElementById('ui-title').innerHTML = translations[lang].title;
+      document.getElementById('ui-subtitle').innerHTML = translations[lang].subtitle;
+      document.getElementById('ui-step1').innerHTML = translations[lang].step1;
+      document.getElementById('ui-step2').innerHTML = translations[lang].step2;
+      document.getElementById('ui-catText').innerHTML = translations[lang].catText;
+      document.getElementById('ui-dogText').innerHTML = translations[lang].dogText;
+      document.getElementById('ui-priceLabel').innerHTML = translations[lang].priceLabel;
+      document.getElementById('ui-bookingBtn').innerHTML = translations[lang].bookingBtn;
+      document.getElementById('ui-disclaimer').innerHTML = translations[lang].disclaimer;
+
+      // Maintain dynamic selections and state variables on switch execution
+      if (selectedPetType) {
+        renderDropdownList(selectedPetType);
+      } else {
+        document.getElementById('ui-placeholder').textContent = translations[lang].placeholderEmpty;
+      }
+    }
+
+    function selectPet(type) {
+      selectedPetType = type;
+      
+      const catBtn = document.getElementById('btn-cat');
+      const dogBtn = document.getElementById('btn-dog');
+      
+      // Clear visible cards upon changing base category targets
+      document.getElementById('priceCard').classList.add('hidden');
+      document.getElementById('bookingAction').classList.add('hidden');
+
+      if (type === 'cat') {
+        catBtn.classList.add('border-blue-500', 'bg-blue-50/50', 'text-blue-700');
+        dogBtn.classList.remove('border-blue-500', 'bg-blue-50/50', 'text-blue-700');
+      } else {
+        dogBtn.classList.add('border-blue-500', 'bg-blue-50/50', 'text-blue-700');
+        catBtn.classList.remove('border-blue-500', 'bg-blue-50/50', 'text-blue-700');
+      }
+
+      renderDropdownList(type);
+    }
+
+    function renderDropdownList(type) {
+      const dropdown = document.getElementById('serviceSelect');
+      
+      dropdown.innerHTML = `<option value="">${translations[currentLang].placeholderActive}</option>`;
+      
+      // Check current translation keys to inject right array name
+      clinicPricing[type].forEach(service => {
+        let displayName = (currentLang === 'en') ? service.nameEn : service.nameBm;
+        let option = document.createElement('option');
+        option.value = service.cost;
+        option.textContent = `${displayName} (${service.cost})`;
+        dropdown.appendChild(option);
+      });
+
+      dropdown.disabled = false;
+      dropdown.classList.remove('bg-slate-50', 'text-slate-400', 'cursor-not-allowed');
+      dropdown.classList.add('bg-white', 'text-slate-700');
+    }
+
+    function displayFinalPrice() {
+      const dropdown = document.getElementById('serviceSelect');
+      const priceCard = document.getElementById('priceCard');
+      const priceOutput = document.getElementById('priceOutput');
+      const bookingAction = document.getElementById('bookingAction');
+
+      if (!dropdown.value) {
+        priceCard.classList.add('hidden');
+        bookingAction.classList.add('hidden');
+        return;
+      }
+
+      priceOutput.textContent = dropdown.value;
+      priceCard.classList.remove('hidden', 'scale-95');
+      priceCard.classList.add('scale-100');
+      bookingAction.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
