@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clinic Price Checker (Dual Language)</title>
-  <!-- Tailwind CSS for clean styling -->
+  <title>Petpal Price Checker</title>
+  <!-- Tailwind CSS for mobile-first layout -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 flex items-center justify-center min-h-screen p-4 antialiased font-sans">
@@ -17,17 +17,9 @@
       <button id="lang-bm" onclick="changeLanguage('bm')" class="px-3 py-1 text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800">BM</button>
     </div>
 
-    <!-- Updated Header Icon, Logo, & Titles -->
-    <div class="text-center mb-8 mt-4">
-      <!-- 1. NEW: Petpal Logo (Image) -->
-      <!-- *** ACTION REQUIRED: Replace 'PASTE_YOUR_PETPAL_LOGO_URL_HERE' with your real logo image link *** -->
-      <img src="PASTE_YOUR_PETPAL_LOGO_URL_HERE" alt="Petpal Logo" class="w-16 h-16 mx-auto mb-3 object-contain">
-
-      <!-- 2. Original Medical Icon -->
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 mb-3 text-2xl">
-        🩺
-      </div>
-      
+    <!-- Header Block (Logo & Titles) -->
+    <div class="text-center mb-6 mt-4">
+      <img src="logo.png" alt="Petpal Logo" class="w-20 h-20 mx-auto mb-2 object-contain">
       <h1 id="ui-title" class="text-2xl font-bold text-slate-800">Clinic Price Checker</h1>
       <p id="ui-subtitle" class="text-sm text-slate-500 mt-1">Select your pet's details below to view automated pricing estimates.</p>
     </div>
@@ -45,7 +37,7 @@
       </div>
     </div>
 
-    <!-- Step 2: Service Selection Dropdown -->
+    <!-- Step 2: Service Dropdown Selection -->
     <div class="mb-6">
       <label id="ui-step2" class="block font-semibold text-slate-700 text-sm mb-2">2. Choose Service</label>
       <select id="serviceSelect" onchange="displayFinalPrice()" class="w-full p-3.5 border-2 border-slate-200 rounded-xl bg-slate-50 text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-not-allowed" disabled>
@@ -54,14 +46,22 @@
     </div>
 
     <!-- Price Card Display Window -->
-    <div id="priceCard" class="hidden bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-center shadow-lg shadow-blue-600/20 mb-6 scale-95 transition-all duration-300">
+    <div id="priceCard" class="hidden bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-center shadow-lg shadow-blue-600/20 mb-4 scale-95 transition-all duration-300">
       <p id="ui-priceLabel" class="text-xs uppercase tracking-widest text-blue-200 font-bold">Estimated Baseline Cost</p>
       <p id="priceOutput" class="text-4xl font-black text-white mt-2">RM 0</p>
     </div>
 
-    <!-- Booking WhatsApp Call to Action -->
+    <!-- Dynamic Itemized Breakdown Box -->
+    <div id="breakdownCard" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-2xl mb-6">
+      <p id="ui-breakdownTitle" class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">📋 What's Included & Medical Details / Perincian:</p>
+      <ul id="breakdownList" class="text-sm text-slate-600 space-y-1.5 list-disc list-inside">
+        <!-- Injected dynamically by JavaScript -->
+      </ul>
+    </div>
+
+    <!-- Booking Call to Action Link -->
     <div id="bookingAction" class="hidden mb-6">
-      <a href="https://wa.me/YOUR_PHONE_NUMBER" target="_blank" id="ui-bookingBtn" class="w-full block text-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-4 rounded-xl shadow-md transition-colors text-sm">
+      <a href="https://wa.me/60123456789" target="_blank" id="ui-bookingBtn" class="w-full block text-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-4 rounded-xl shadow-md transition-colors text-sm">
         💬 Tap here to Book Appointment on WhatsApp
       </a>
     </div>
@@ -75,13 +75,10 @@
   </div>
 
   <script>
-    // Current application language state
     let currentLang = 'en';
     let selectedPetType = null;
 
-    // ==========================================
-    // 1. DATA TRANS-DICTIONS (UI TEXT ELEMENTS)
-    // ==========================================
+    // 1. UI STATIC TEXT TRANSLATIONS
     const translations = {
       en: {
         title: "Clinic Price Checker",
@@ -111,29 +108,183 @@
       }
     };
 
-    // ==========================================
-    // 2. CLINIC PRICING DATA CONFIGURATION
-    // You can customize English/Malay names and prices here!
-    // ==========================================
+    // =================================================================
+    // 2. CLINIC PRICING MASTER DATA LIST (Refined)
+    // =================================================================
     const clinicPricing = {
       cat: [
-        { nameEn: "F4 Vaccination", nameBm: "Vaksinasi F4", cost: "RM 65" },
-        { nameEn: "Rabies Protection Shot", nameBm: "Suntikan Pencegahan Rabies", cost: "RM 85" },
-        { nameEn: "General Consultation Only", nameBm: "Konsultasi Am Sahaja", cost: "RM 35" }
+        // VACCINATIONS
+        { 
+          nameEn: "Vaccination: Core Vaccine", 
+          nameBm: "Vaksinasi: Vaksin Teras", 
+          cost: "RM 65",
+          breakdownEn: ["Protects against: Parvovirus, Calicivirus, Herpesvirus, Chlamydia", "Includes standard injection administration"],
+          breakdownBm: ["Melindungi daripada: Parvovirus, Calicivirus, Herpesvirus, Chlamydia", "Termasuk kos pengendalian suntikan standard"]
+        },
+        { 
+          nameEn: "Vaccination: Rabies Shot", 
+          nameBm: "Vaksinasi: Suntikan Rabies", 
+          cost: "RM 85",
+          breakdownEn: ["Protects against the deadly Rabies virus transmission", "Highly recommended for regional bio-safety"],
+          breakdownBm: ["Mencegah jangkitan dan penularan virus Rabies yang membawa maut", "Sangat disyorkan untuk keselamatan biologi serantau"]
+        },
+        // NEUTERING MALE
+        { 
+          nameEn: "Neutering: Male Cat (< 5kg)", 
+          nameBm: "Kembiri: Kucing Jantan (< 5kg)", 
+          cost: "RM 130",
+          breakdownEn: ["Price covers the base surgical procedure fee only", "EXCLUDES: Pre-op checkups, take-home medicine, or E-Collar"],
+          breakdownBm: ["Harga merangkumi yuran prosedur pembedahan asas sahaja", "TIDAK TERMASUK: Pemeriksaan pra-bedah, ubat bawa balik, atau kolar pelindung (E-Collar)"]
+        },
+        { 
+          nameEn: "Neutering: Male Cat (> 5kg)", 
+          nameBm: "Kembiri: Kucing Jantan (> 5kg)", 
+          cost: "RM 150",
+          breakdownEn: ["Price covers the base surgical procedure fee only", "EXCLUDES: Pre-op checkups, take-home medicine, or E-Collar"],
+          breakdownBm: ["Harga merangkumi yuran prosedur pembedahan asas sahaja", "TIDAK TERMASUK: Pemeriksaan pra-bedah, ubat bawa balik, atau kolar pelindung (E-Collar)"]
+        },
+        // NEUTERING FEMALE
+        { 
+          nameEn: "Neutering: Female Cat (Normal)", 
+          nameBm: "Kembiri: Kucing Betina (Normal)", 
+          cost: "RM 220",
+          breakdownEn: ["Price covers standard surgical keyhole/ovariohysterectomy procedure fee", "EXCLUDES: Pre-op checkups, take-home medicine, or E-Collar"],
+          breakdownBm: ["Harga merangkumi yuran pembedahan ovariohisterektomi standard", "TIDAK TERMASUK: Pemeriksaan pra-bedah, ubat bawa balik, atau kolar pelindung (E-Collar)"]
+        },
+        { 
+          nameEn: "Neutering: Female Cat (On Heat)", 
+          nameBm: "Kembiri: Kucing Betina (Biang / Seksual Aktif)", 
+          cost: "RM 250",
+          breakdownEn: ["Includes surcharge for fragile, vascular engorged reproductive tissues", "EXCLUDES: Pre-op checkups, take-home medicine, or E-Collar"],
+          breakdownBm: ["Termasuk caj tambahan untuk tisu pembiakan yang membengkak/banyak salur darah", "TIDAK TERMASUK: Pemeriksaan pra-bedah, ubat bawa balik, atau kolar pelindung (E-Collar)"]
+        },
+        { 
+          nameEn: "Neutering: Female Cat (Early Pregnancy)", 
+          nameBm: "Kembiri: Kucing Betina (Bunting Peringkat Awal)", 
+          cost: "RM 280",
+          breakdownEn: ["Includes surgical complexity fee for early gestational management", "EXCLUDES: Pre-op checkups, take-home medicine, or E-Collar"],
+          breakdownBm: ["Termasuk yuran kerumitan bedah bagi pengurusan awal kandungan", "TIDAK TERMASUK: Pemeriksaan pra-bedah, ubat bawa balik, atau kolar pelindung (E-Collar)"]
+        },
+        { 
+          nameEn: "Neutering: Female Cat (Pyometra / Womb Infection)", 
+          nameBm: "Kembiri: Kucing Betina (Pyometra / Jangkitan Rahim)", 
+          cost: "RM 300 - RM 350",
+          breakdownEn: ["Critical therapeutic surgery to remove pus-filled infected uterus", "Price varies based on tissue fragility and fluid volume balance", "EXCLUDES: Critical care stabilization meds, post-op antibiotics, or E-Collar"],
+          breakdownBm: ["Pembedahan terapeutik kritikal untuk membuang rahim yang dijangkiti nanah", "Harga berbeza mengikut kerapuhan tisu dan volume takungan cecair rahim", "TIDAK TERMASUK: Ubat stabil wad kritikal, antibiotik pasca-bedah, atau E-Collar"]
+        },
+        // CONSULTATION
+        { 
+          nameEn: "General Consultation & Clinical Triage", 
+          nameBm: "Konsultasi Am & Triage Klinikal", 
+          cost: "Quote Required",
+          requiresQuote: true,
+          linkEn: "https://wa.me/60123456789?text=Hi%20Petpal%20Animal%20Clinic!%20%F0%9F%90%BE%20I%20would%20like%20to%20request%20a%20quotation%20for%20a%20consultation.%20Here%20are%20my%20pet's%20details%3A%0A%0A%2A1.%20PET%20IDENTITY%2A%0A-%20Name%3A%20%0A-%20Species%20%26%20Breed%3A%20Cat%20%2F%20%0A%0A%2A2.%20AGE%20%26%20WEIGHT%2A%0A-%20Age%20(Years%2FMonths)%3A%20%0A-%20Approx%20Weight%20(kg)%3A%20%0A%0A%2A3.%20CONDITION%20%26%20SYMPTOMS%2A%0A-%20Main%20Symptoms%3A%20%0A-%20Duration%20(How%20many%20days%3F)%3A%20%0A-%20Still%20eating%2Fdrinking%3F%20(Yes%2FNo)%3A%20%0A%0A%2A4.%20PREFERRED%20APPOINTMENT%2A%0A-%20Date%20%26%20Time%3A%20%0A%0AThank%20you!",
+          linkBm: "https://wa.me/60123456789?text=Hai%20Klinik%20Haiwan%20Petpal!%20%F0%9F%90%BE%20Saya%20ingin%20meminta%20sebut%20harga%20untuk%20konsultasi.%20Berikut%20adalah%20butiran%20haiwan%20saya%3A%0A%0A%2A1.%20IDENTITI%20HAIWAN%2A%0A-%20Nama%3A%20%0A-%20Jenis%20%26%20Baka%3A%20Kucing%20%2F%20%0A%0A%2A2.%20UMUR%20%26%20BERAT%2A%0A-%20Umur%20(Tahun%2FBulan)%3A%20%0A-%20Anggaran%20Berat%20(kg)%3A%20%0A%0A%2A3.%20GEJALA%20%26%20MASALAH%2A%0A-%20Gejala%20Utama%3A%20%0A-%20Tempoh%20(Berapa%20hari%3F)%3A%20%0A-%20Masih%20makan%2Fminum%3F%20(Ya%2FTidak)%3A%20%0A%0A%2A4.%20PILIHAN%20TEMUJANJI%2A%0A-%20Tarikh%20%26%20Masa%3A%20%0A%0ATerima%20kasih!"
+        }
       ],
       dog: [
-        { nameEn: "6-in-1 Core Vaccination", nameBm: "Vaksinasi Teras 6-dalam-1", cost: "RM 60" },
-        { nameEn: "9-in-1 Comprehensive Shot", nameBm: "Suntikan Komprehensif 9-dalam-1", cost: "RM 80" },
-        { nameEn: "Rabies Protection Shot", nameBm: "Suntikan Pencegahan Rabies", cost: "RM 85" },
-        { nameEn: "General Consultation Only", nameBm: "Konsultasi Am Sahaja", cost: "RM 35" }
+        // VACCINATIONS
+        { 
+          nameEn: "Vaccination: Core Vaccine (C6)", 
+          nameBm: "Vaksinasi: Vaksin Teras (C6)", 
+          cost: "RM 70",
+          breakdownEn: ["Protects against: Parvovirus, Adenovirus, Leptospira, Distemper, Parainfluenza", "Includes standard injection administration"],
+          breakdownBm: ["Melindungi daripada: Parvovirus, Adenovirus, Leptospira, Distemper, Parainfluenza", "Termasuk kos pengendalian suntikan standard"]
+        },
+        { 
+          nameEn: "Vaccination: Rabies Shot", 
+          nameBm: "Vaksinasi: Suntikan Rabies", 
+          cost: "RM 85",
+          breakdownEn: ["Protects against the deadly Rabies virus transmission", "Highly recommended for regional bio-safety"],
+          breakdownBm: ["Mencegah jangkitan dan penularan virus Rabies yang membawa maut", "Sangat disyorkan untuk keselamatan biologi serantau"]
+        },
+        // NEUTERING MALE
+        { 
+          nameEn: "Neutering: Male Dog (< 15kg)", 
+          nameBm: "Kembiri: Anjing Jantan (< 15kg)", 
+          cost: "RM 250",
+          breakdownEn: ["Base procedure fee only", "EXCLUDES: Pre-op checks, IV fluids drip, take-home meds, or E-Collar"],
+          breakdownBm: ["Yuran prosedur asas sahaja", "TIDAK TERMASUK: Ujian darah, masuk air (IV drip), ubat balik, atau E-Collar"]
+        },
+        { 
+          nameEn: "Neutering: Male Dog (15kg - 19.9kg)", 
+          nameBm: "Kembiri: Anjing Jantan (15kg - 19.9kg)", 
+          cost: "RM 300",
+          breakdownEn: ["Base procedure fee calculated by anesthetic dosage scaling thresholds", "EXCLUDES: Pre-op checks, IV fluids drip, take-home meds, or E-Collar"],
+          breakdownBm: ["Yuran prosedur asas mengikut skala dos ubat bius berat badan", "TIDAK TERMASUK: Ujian darah, masuk air (IV drip), ubat balik, atau E-Collar"]
+        },
+        // NEUTERING FEMALE (COMPLEX AUTOMATED BREAKDOWNS)
+        { 
+          nameEn: "Neutering: Female Dog (Normal, < 15kg)", 
+          nameBm: "Kembiri: Anjing Betina (Normal, < 15kg)", 
+          cost: "RM 400",
+          breakdownEn: ["Standard base abdominal surgery fee", "EXCLUDES: Additional checkups, IV fluid setup, take-home medicines, E-collar"],
+          breakdownBm: ["Yuran pembedahan abdomen asas standard", "TIDAK TERMASUK: Pemeriksaan tambahan, IV drip, ubat-ubatan balik, kolar pelindung"]
+        },
+        { 
+          nameEn: "Neutering: Female Dog (Normal, 15kg - 19.9kg)", 
+          nameBm: "Kembiri: Anjing Betina (Normal, 15kg - 19.9kg)", 
+          cost: "RM 430",
+          breakdownEn: ["Base procedure fee scaled up for advanced anesthetic gas/fluid volumes", "EXCLUDES: Additional checkups, IV fluid setup, take-home medicines, E-collar"],
+          breakdownBm: ["Yuran asas diselaraskan mengikut keperluan kuantiti ubat bius/gas", "TIDAK TERMASUK: Pemeriksaan tambahan, IV drip, ubat-ubatan balik, kolar pelindung"]
+        },
+        { 
+          nameEn: "Neutering: Female Dog (On Heat, < 15kg)", 
+          nameBm: "Kembiri: Anjing Betina (Biang, < 15kg)", 
+          cost: "RM 500",
+          breakdownEn: ["Includes standard base (RM 400) + Advanced vascular ligation complexity fee (+RM 100)", "EXCLUDES: IV fluid setup, take-home medicines, or E-collar"],
+          breakdownBm: ["Termasuk kos asas (RM 400) + Caj tambahan kerumitan ikatan salur darah (+RM 100)", "TIDAK TERMASUK: Penyediaan air (IV drip), ubat bawa balik, atau kolar pelindung"]
+        },
+        { 
+          nameEn: "Neutering: Female Dog (On Heat, 15kg - 19.9kg)", 
+          nameBm: "Kembiri: Anjing Betina (Biang, 15kg - 19.9kg)", 
+          cost: "RM 530",
+          breakdownEn: ["Includes weighted base (RM 430) + Advanced vascular ligation complexity fee (+RM 100)", "EXCLUDES: IV fluid setup, take-home medicines, or E-collar"],
+          breakdownBm: ["Termasuk kos berat (RM 430) + Caj tambahan kerumitan ikatan salur darah (+RM 100)", "TIDAK TERMASUK: Penyediaan air (IV drip), ubat bawa balik, atau kolar pelindung"]
+        },
+        { 
+          nameEn: "Neutering: Female Dog (Early Pregnancy, < 15kg)", 
+          nameBm: "Kembiri: Anjing Betina (Bunting Awal, < 15kg)", 
+          cost: "RM 600",
+          breakdownEn: ["Includes standard base (RM 400) + Surgical management complication surcharge (+RM 200)", "EXCLUDES: Extra surgical fluids, post-op recovery pack, or E-collar"],
+          breakdownBm: ["Termasuk kos asas (RM 400) + Surcaj pengurusan komplikasi pembedahan (+RM 200)", "TIDAK TERMASUK: Air bedah tambahan, pek pemulihan pasca-bedah, atau kolar pelindung"]
+        },
+        { 
+          nameEn: "Neutering: Female Dog (Early Pregnancy, 15kg - 19.9kg)", 
+          nameBm: "Kembiri: Anjing Betina (Bunting Awal, 15kg - 19.9kg)", 
+          cost: "RM 630",
+          breakdownEn: ["Includes weighted base (RM 430) + Surgical management complication surcharge (+RM 200)", "EXCLUDES: Extra surgical fluids, post-op recovery pack, or E-collar"],
+          breakdownBm: ["Termasuk kos berat (RM 430) + Surcaj pengurusan komplikasi pembedahan (+RM 200)", "TIDAK TERMASUK: Air bedah tambahan, pek pemulihan pasca-bedah, atau kolar pelindung"]
+        },
+        { 
+          nameEn: "Neutering: Female Dog (Pyometra Emergency, < 15kg)", 
+          nameBm: "Kembiri: Anjing Betina (Pyometra / Rahim Dijangkiti, < 15kg)", 
+          cost: "RM 650",
+          breakdownEn: ["Includes base (RM 400) + High-risk toxic pathology removal fee (+RM 250)", "EXCLUDES: Mandatory life-support stabilization, intensive antibiotics, or monitoring"],
+          breakdownBm: ["Termasuk kos asas (RM 400) + Yuran pembuangan patologi toksik berisiko tinggi (+RM 250)", "TIDAK TERMASUK: Penstabilan sokongan hayat wajib, antibiotik intensif, atau pemantauan wad"]
+        },
+        { 
+          nameEn: "Neutering: Female Dog (Pyometra Emergency, 15kg - 19.9kg)", 
+          nameBm: "Kembiri: Anjing Betina (Pyometra / Rahim Dijangkiti, 15kg - 19.9kg)", 
+          cost: "RM 680",
+          breakdownEn: ["Includes weighted base (RM 430) + High-risk toxic pathology removal fee (+RM 250)", "EXCLUDES: Mandatory life-support stabilization, intensive antibiotics, or monitoring"],
+          breakdownBm: ["Termasuk kos berat (RM 430) + Yuran pembuangan patologi toksik berisiko tinggi (+RM 250)", "TIDAK TERMASUK: Penstabilan sokongan hayat wajib, antibiotik intensif, atau pemantauan wad"]
+        },
+        // CONSULTATION
+        { 
+          nameEn: "General Consultation & Clinical Triage", 
+          nameBm: "Konsultasi Am & Triage Klinikal", 
+          cost: "Quote Required",
+          requiresQuote: true,
+          linkEn: "https://wa.me/60123456789?text=Hi%20Petpal%20Animal%20Clinic!%20%F0%9F%90%BE%20I%20would%20like%20to%20request%20a%20quotation%20for%20a%20consultation.%20Here%20are%20my%20pet's%20details%3A%0A%0A%2A1.%20PET%20IDENTITY%2A%0A-%20Name%3A%20%0A-%20Species%20%26%20Breed%3A%20Dog%20%2F%20%0A%0A%2A2.%20AGE%20%26%20WEIGHT%2A%0A-%20Age%20(Years%2FMonths)%3A%20%0A-%20Approx%20Weight%20(kg)%3A%20%0A%0A%2A3.%20CONDITION%20%26%20SYMPTOMS%2A%0A-%20Main%20Symptoms%3A%20%0A-%20Duration%20(How%20many%20days%3F)%3A%20%0A-%20Still%20eating%2Fdrinking%3F%20(Yes%2FNo)%3A%20%0A%0A%2A4.%20PREFERRED%20APPOINTMENT%2A%0A-%20Date%20%26%20Time%3A%20%0A%0AThank%20you!",
+          linkBm: "https://wa.me/60123456789?text=Hai%20Klinik%20Haiwan%20Petpal!%20%F0%9F%90%BE%20Saya%20ingin%20meminta%20sebut%20harga%20untuk%20konsultasi.%20Berikut%20adalah%20butiran%20haiwan%20saya%3A%0A%0A%2A1.%20IDENTITI%20HAIWAN%2A%0A-%20Nama%3A%20%0A-%20Jenis%20%26%20Baka%3A%20Anjing%20%2F%20%0A%0A%2A2.%20UMUR%20%26%20BERAT%2A%0A-%20Umur%20(Tahun%2FBulan)%3A%20%0A-%20Anggaran%20Berat%20(kg)%3A%20%0A%0A%2A3.%20GEJALA%20%26%20MASALAH%2A%0A-%20Gejala%20Utama%3A%20%0A-%20Tempoh%20(Berapa%20hari%3F)%3A%20%0A-%20Masih%20makan%2Fminum%3F%20(Ya%2FTidak)%3A%20%0A%0A%2A4.%20PILIHAN%20TEMUJANJI%2A%0A-%20Tarikh%20%26%20Masa%3A%20%0A%0ATerima%20kasih!"
+        }
       ]
     };
 
-    // Switch Language execution logic
+    // 3. APPLICATION LOGIC FUNCTIONS
     function changeLanguage(lang) {
       currentLang = lang;
-      
-      // Update visual style elements of language switch controls
       const btnEn = document.getElementById('lang-en');
       const btnBm = document.getElementById('lang-bm');
       
@@ -145,7 +296,6 @@
         btnEn.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800";
       }
 
-      // Re-translate all basic static text blocks on the DOM layout
       document.getElementById('ui-title').innerHTML = translations[lang].title;
       document.getElementById('ui-subtitle').innerHTML = translations[lang].subtitle;
       document.getElementById('ui-step1').innerHTML = translations[lang].step1;
@@ -156,7 +306,6 @@
       document.getElementById('ui-bookingBtn').innerHTML = translations[lang].bookingBtn;
       document.getElementById('ui-disclaimer').innerHTML = translations[lang].disclaimer;
 
-      // Maintain dynamic selections and state variables on switch execution
       if (selectedPetType) {
         renderDropdownList(selectedPetType);
       } else {
@@ -166,13 +315,12 @@
 
     function selectPet(type) {
       selectedPetType = type;
-      
       const catBtn = document.getElementById('btn-cat');
       const dogBtn = document.getElementById('btn-dog');
       
-      // Clear visible cards upon changing base category targets
       document.getElementById('priceCard').classList.add('hidden');
       document.getElementById('bookingAction').classList.add('hidden');
+      document.getElementById('breakdownCard').classList.add('hidden');
 
       if (type === 'cat') {
         catBtn.classList.add('border-blue-500', 'bg-blue-50/50', 'text-blue-700');
@@ -187,15 +335,13 @@
 
     function renderDropdownList(type) {
       const dropdown = document.getElementById('serviceSelect');
-      
       dropdown.innerHTML = `<option value="">${translations[currentLang].placeholderActive}</option>`;
       
-      // Check current translation keys to inject right array name
-      clinicPricing[type].forEach(service => {
+      clinicPricing[type].forEach((service, index) => {
         let displayName = (currentLang === 'en') ? service.nameEn : service.nameBm;
         let option = document.createElement('option');
-        option.value = service.cost;
-        option.textContent = displayName;
+        option.value = index;
+        option.textContent = displayName; // Price is cleanly hidden from dropdown selection view
         dropdown.appendChild(option);
       });
 
@@ -209,17 +355,61 @@
       const priceCard = document.getElementById('priceCard');
       const priceOutput = document.getElementById('priceOutput');
       const bookingAction = document.getElementById('bookingAction');
+      const bookingBtn = document.getElementById('ui-bookingBtn');
+      const breakdownCard = document.getElementById('breakdownCard');
+      const breakdownList = document.getElementById('breakdownList');
 
-      if (!dropdown.value) {
+      if (dropdown.value === "") {
         priceCard.classList.add('hidden');
         bookingAction.classList.add('hidden');
+        breakdownCard.classList.add('hidden');
         return;
       }
 
-      priceOutput.textContent = dropdown.value;
-      priceCard.classList.remove('hidden', 'scale-95');
-      priceCard.classList.add('scale-100');
-      bookingAction.classList.remove('hidden');
+      const selectedIndex = dropdown.value;
+      const selectedService = clinicPricing[selectedPetType][selectedIndex];
+
+      // Handle redirect flow for custom triage quotations
+      if (selectedService.requiresQuote) {
+        priceCard.classList.add('hidden');
+        breakdownCard.classList.add('hidden');
+        
+        if (currentLang === 'en') {
+          bookingBtn.innerHTML = "💬 Please WhatsApp message for quotation";
+          bookingBtn.href = selectedService.linkEn;
+        } else {
+          bookingBtn.innerHTML = "💬 Sila mesej WhatsApp untuk sebut harga";
+          bookingBtn.href = selectedService.linkBm;
+        }
+        bookingAction.classList.remove('hidden');
+      } else {
+        // Standard flow for fixed prices
+        priceOutput.textContent = selectedService.cost;
+        priceCard.className = "bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-center shadow-lg shadow-blue-600/20 mb-4 scale-100 transition-all duration-300";
+        
+        if (currentLang === 'en') {
+          bookingBtn.innerHTML = "💬 Tap here to Book Appointment on WhatsApp";
+          bookingBtn.href = "https://wa.me/60123456789?text=Hi%20Petpal,%20I%20just%20used%20your%20online%20price%20checker%20and%20would%20like%20to%20book%20an%20appointment!";
+        } else {
+          bookingBtn.innerHTML = "💬 Ketik di sini untuk Tempah Temujanji di WhatsApp";
+          bookingBtn.href = "https://wa.me/60123456789?text=Hai%20Petpal,%20saya%20baru%20sahaja%20menggunakan%20semakan%20harga%20talian%20dan%20ingin%20membuat%20temujanji!";
+        }
+        bookingAction.classList.remove('hidden');
+        
+        // Handle medical detail breakdowns
+        const items = (currentLang === 'en') ? selectedService.breakdownEn : selectedService.breakdownBm;
+        if (items && items.length > 0) {
+          breakdownList.innerHTML = '';
+          items.forEach(item => {
+            let li = document.createElement('li');
+            li.textContent = item;
+            breakdownList.appendChild(li);
+          });
+          breakdownCard.classList.remove('hidden');
+        } else {
+          breakdownCard.classList.add('hidden');
+        }
+      }
     }
   </script>
 </body>
