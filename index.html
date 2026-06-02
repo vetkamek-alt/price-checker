@@ -189,7 +189,7 @@
         let displayName = (currentLang === 'en') ? service.nameEn : service.nameBm;
         let option = document.createElement('option');
         option.value = service.cost;
-        option.textContent = `${displayName} (${service.cost})`;
+        option.textContent = displayName;
         dropdown.appendChild(option);
       });
 
