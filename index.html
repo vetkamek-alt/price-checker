@@ -172,7 +172,22 @@
           placeholderEn: "-- Choose a Product --",
           placeholderBm: "-- Pilih Produk --",
           options: [
-            { nameEn: "Nexgard Combo S (<2.5 kg)", nameBm: "Nexgard Combo S (<2.5 kg)", cost: "RM 45", image: "NexgardCS.png", breakdownEn: ["High protein formulation for adult cats", "Promotes digestive tract health & shiny coat"], breakdownBm: ["Formulasi protein tinggi untuk kucing dewasa", "Menjaga sistem pencernaan & bulu berkilat"] },
+            {
+              nameEn: "NexGard Combo S (Cats 1kg - 2.5kg)",
+              nameBm: "NexGard Combo S (Kucing 1kg - 2.5kg)",
+              cost: "Options Below / Pilihan Di Bawah", 
+              image: "NexgardCS.png", 
+              breakdownEn: [
+                "🧪 1 Tube (Single Dose): RM 48",
+                "📦 1 Box (Contains 3 Tubes): RM 135",
+                "✨ Complete broad-spectrum spot-on prevention against fleas, ticks, ear mites, roundworms, and hookworms."
+              ],
+              breakdownBm: [
+                "🧪 1 Tiub (Dosis Tunggal): RM 48",
+                "📦 1 Kotak (Mengandungi 3 Tiub): RM 135",
+                "✨ Perlindungan titis spektrum luas lengkap terhadap kutu, pepijat, hama telinga, cacing bulat, dan cacing kerawit."
+              ]
+            },
             { nameEn: "Flea & Tick Treatment Spot-On", nameBm: "Ubat Titis Kutu Haiwan", cost: "RM 32", breakdownEn: ["Fast-acting liquid treatment applied to skin", "Kills adult fleas and ticks within 24 hours"], breakdownBm: ["Ubat cecair titis di leher belakang bertindak pantas", "Membunuh kutu dewasa dalam masa 24 jam"] }
           ]
         },
@@ -294,7 +309,7 @@
       document.getElementById('bookingAction').classList.add('hidden');
       document.getElementById('breakdownCard').classList.add('hidden');
       document.getElementById('subContainer').classList.add('hidden');
-      document.getElementById('imageCard').classList.add('hidden'); // Fix: Clears old image on pet change
+      document.getElementById('imageCard').classList.add('hidden'); 
 
       const catBtn = document.getElementById('btn-cat');
       const dogBtn = document.getElementById('btn-dog');
@@ -335,7 +350,7 @@
       const bookingBtn = document.getElementById('ui-bookingBtn');
       const step3Label = document.getElementById('ui-step3');
       const subSelect = document.getElementById('subSelect');
-      document.getElementById('imageCard').classList.add('hidden'); // Fix: Reset image display window
+      document.getElementById('imageCard').classList.add('hidden'); 
 
       if (dropdown.value === "") {
         priceCard.classList.add('hidden');
@@ -396,18 +411,16 @@
         document.getElementById('priceCard').classList.add('hidden');
         document.getElementById('bookingAction').classList.add('hidden');
         document.getElementById('breakdownCard').classList.add('hidden');
-        document.getElementById('imageCard').classList.add('hidden'); // Fix: Hide image box if choice goes empty
+        document.getElementById('imageCard').classList.add('hidden'); 
         return;
       }
 
       const activeGroup = clinicPricing[selectedPetType][serviceDropdown.value].options;
       const targetItem = activeGroup[subDropdown.value];
 
-      // Fix: Now explicitly passing 'targetItem.image' metadata over to renderer
       renderFinalOutput(targetItem.cost, targetItem.breakdownEn, targetItem.breakdownBm, targetItem.image);
     }
 
-    // Fix: Added fourth tracking parameter 'imageFile' to output renderer assembly
     function renderFinalOutput(costValue, pointsEn, pointsBm, imageFile) {
       const priceCard = document.getElementById('priceCard');
       const priceOutput = document.getElementById('priceOutput');
@@ -418,7 +431,7 @@
       const imageCard = document.getElementById('imageCard');
       const productImage = document.getElementById('productImage');
 
-      // Fix: Run dynamic conditional pipeline checks for image layout activation
+      // Run image validation pipeline checks
       if (imageFile) {
         productImage.src = imageFile;
         imageCard.classList.remove('hidden');
