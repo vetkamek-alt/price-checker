@@ -53,7 +53,7 @@
       </select>
     </div>
 
-        <!-- NEW: Dynamic Product Image Display Window -->
+    <!-- Dynamic Product Image Display Window -->
     <div id="imageCard" class="hidden mb-4 flex justify-center bg-slate-50 p-4 rounded-2xl border border-slate-100">
       <img id="productImage" src="" alt="Product Image" class="w-40 h-40 object-contain rounded-xl">
     </div>
@@ -294,6 +294,7 @@
       document.getElementById('bookingAction').classList.add('hidden');
       document.getElementById('breakdownCard').classList.add('hidden');
       document.getElementById('subContainer').classList.add('hidden');
+      document.getElementById('imageCard').classList.add('hidden'); // Fix: Clears old image on pet change
 
       const catBtn = document.getElementById('btn-cat');
       const dogBtn = document.getElementById('btn-dog');
@@ -334,6 +335,7 @@
       const bookingBtn = document.getElementById('ui-bookingBtn');
       const step3Label = document.getElementById('ui-step3');
       const subSelect = document.getElementById('subSelect');
+      document.getElementById('imageCard').classList.add('hidden'); // Fix: Reset image display window
 
       if (dropdown.value === "") {
         priceCard.classList.add('hidden');
@@ -382,7 +384,7 @@
       // ROUTE 3: Standard Fixed Item (e.g., Simple Vaccines)
       else {
         subContainer.classList.add('hidden');
-        renderFinalOutput(selectedService.cost, selectedService.breakdownEn, selectedService.breakdownBm);
+        renderFinalOutput(selectedService.cost, selectedService.breakdownEn, selectedService.breakdownBm, null);
       }
     }
 
@@ -394,22 +396,35 @@
         document.getElementById('priceCard').classList.add('hidden');
         document.getElementById('bookingAction').classList.add('hidden');
         document.getElementById('breakdownCard').classList.add('hidden');
+        document.getElementById('imageCard').classList.add('hidden'); // Fix: Hide image box if choice goes empty
         return;
       }
 
       const activeGroup = clinicPricing[selectedPetType][serviceDropdown.value].options;
       const targetItem = activeGroup[subDropdown.value];
 
-      renderFinalOutput(targetItem.cost, targetItem.breakdownEn, targetItem.breakdownBm);
+      // Fix: Now explicitly passing 'targetItem.image' metadata over to renderer
+      renderFinalOutput(targetItem.cost, targetItem.breakdownEn, targetItem.breakdownBm, targetItem.image);
     }
 
-    function renderFinalOutput(costValue, pointsEn, pointsBm) {
+    // Fix: Added fourth tracking parameter 'imageFile' to output renderer assembly
+    function renderFinalOutput(costValue, pointsEn, pointsBm, imageFile) {
       const priceCard = document.getElementById('priceCard');
       const priceOutput = document.getElementById('priceOutput');
       const bookingAction = document.getElementById('bookingAction');
       const bookingBtn = document.getElementById('ui-bookingBtn');
       const breakdownCard = document.getElementById('breakdownCard');
       const breakdownList = document.getElementById('breakdownList');
+      const imageCard = document.getElementById('imageCard');
+      const productImage = document.getElementById('productImage');
+
+      // Fix: Run dynamic conditional pipeline checks for image layout activation
+      if (imageFile) {
+        productImage.src = imageFile;
+        imageCard.classList.remove('hidden');
+      } else {
+        imageCard.classList.add('hidden');
+      }
 
       priceOutput.textContent = costValue;
       priceCard.className = "bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-center shadow-lg shadow-blue-600/20 mb-4 scale-100 transition-all duration-300";
