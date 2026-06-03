@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Petpal Price Checker</title>
+  <title>Petpal Price & Product Checker</title>
   <!-- Tailwind CSS for mobile-first layout -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -19,7 +19,7 @@
 
     <!-- Header Block (Logo & Titles) -->
     <div class="text-center mb-6 mt-4">
-      <img src="Petpal-02 (1).png" alt="Petpal Logo" class="w-20 h-20 mx-auto mb-2 object-contain">
+      <img src="logo.png" alt="Petpal Logo" class="w-20 h-20 mx-auto mb-2 object-contain">
       <h1 id="ui-title" class="text-2xl font-bold text-slate-800">Clinic Price Checker</h1>
       <p id="ui-subtitle" class="text-sm text-slate-500 mt-1">Select your pet's details below to view automated pricing estimates.</p>
     </div>
@@ -34,6 +34,407 @@
         <button id="btn-dog" onclick="selectPet('dog')" class="flex flex-col items-center justify-center p-4 border-2 border-slate-200 rounded-2xl bg-white hover:border-blue-500 hover:bg-blue-50/30 transition-all text-slate-700 font-medium">
           <span class="text-2xl mb-1">🐶</span> <span id="ui-dogText">Dog</span>
         </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Main Service Dropdown Selection -->
+    <div class="mb-5">
+      <label id="ui-step2" class="block font-semibold text-slate-700 text-sm mb-2">2. Choose Service</label>
+      <select id="serviceSelect" onchange="handleMainServiceChange()" class="w-full p-3.5 border-2 border-slate-200 rounded-xl bg-slate-50 text-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-not-allowed" disabled>
+        <option id="ui-placeholder" value="">Select Pet Type First</option>
+      </select>
+    </div>
+
+    <!-- Step 3: Sub-Options Dropdown (Handles Weights & Products dynamically) -->
+    <div id="subContainer" class="hidden mb-6 animate-fade-in">
+      <label id="ui-step3" class="block font-semibold text-slate-700 text-sm mb-2">3. Additional Option</label>
+      <select id="subSelect" onchange="handleSubSelectionChange()" class="w-full p-3.5 border-2 border-slate-200 rounded-xl bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+        <!-- Injected dynamically -->
+      </select>
+    </div>
+
+    <!-- Price Card Display Window -->
+    <div id="priceCard" class="hidden bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-center shadow-lg shadow-blue-600/20 mb-4 scale-95 transition-all duration-300">
+      <p id="ui-priceLabel" class="text-xs uppercase tracking-widest text-blue-200 font-bold">Estimated Baseline Cost</p>
+      <p id="priceOutput" class="text-4xl font-black text-white mt-2">RM 0</p>
+    </div>
+
+    <!-- Dynamic Description & Condition Matrix Box -->
+    <div id="breakdownCard" class="hidden bg-slate-50 border border-slate-200 p-4 rounded-2xl mb-6">
+      <p id="ui-breakdownTitle" class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">📋 Details & Description / Perincian:</p>
+      <ul id="breakdownList" class="text-sm text-slate-600 space-y-1.5 list-disc list-inside">
+        <!-- Injected dynamically -->
+      </ul>
+    </div>
+
+    <!-- Action Button (Book or Request Quote Link) -->
+    <div id="bookingAction" class="hidden mb-6">
+      <!-- REPLACE 60123456789 WITH CLINIC NUMBER BELOW -->
+      <a href="https://wa.me/60123456789" target="_blank" id="ui-bookingBtn" class="w-full block text-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3 px-4 rounded-xl shadow-md transition-colors text-sm">
+        💬 Tap here to Book Appointment on WhatsApp
+      </a>
+    </div>
+
+    <!-- Clinical Disclaimer Footer -->
+    <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl">
+      <p id="ui-disclaimer" class="text-xs text-slate-400 text-center leading-relaxed">
+        <strong>⚠️ Clinical Notice:</strong> Prices shown are starting estimates for standard procedures only. They do not include registration fees, mandatory pre-consultation physical exams, or extra medications. Final quotes are determined entirely by the attending vet.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    let currentLang = 'en';
+    let selectedPetType = null;
+
+    // 1. STATIC UI TRANSLATIONS
+    const translations = {
+      en: {
+        title: "Clinic Price Checker",
+        subtitle: "Select your pet's details below to view automated pricing estimates.",
+        step1: "1. Select Pet Type",
+        step2: "2. Choose Service",
+        step3: "3. Additional Option",
+        catText: "Cat",
+        dogText: "Dog",
+        placeholderEmpty: "Select Pet Type First",
+        placeholderActive: "-- Select Specific Service --",
+        priceLabel: "Estimated Baseline Cost",
+        bookingBtn: "💬 Tap here to Book Appointment on WhatsApp",
+        disclaimer: "<strong>⚠️ Clinical Notice:</strong> Prices shown are starting estimates for standard procedures only. They do not include registration fees, mandatory pre-consultation physical exams, or extra medications. Final quotes are determined entirely by the attending vet."
+      },
+      bm: {
+        title: "Semak Harga Klinik",
+        subtitle: "Pilih butiran haiwan kesayangan anda di bawah untuk melihat anggaran harga automatik.",
+        step1: "1. Pilih Jenis Haiwan",
+        step2: "2. Pilih Perkhidmatan",
+        step3: "3. Pilihan Tambahan",
+        catText: "Kucing",
+        dogText: "Anjing",
+        placeholderEmpty: "Pilih Jenis Haiwan Dahulu",
+        placeholderActive: "-- Pilih Perkhidmatan Spesifik --",
+        priceLabel: "Anggaran Kos Asas",
+        bookingBtn: "💬 Ketik di sini untuk Tempah Temujanji di WhatsApp",
+        disclaimer: "<strong>⚠️ Notis Klinikal:</strong> Harga yang dipaparkan adalah anggaran permulaan untuk prosedur standard sahaja. Tidak termasuk yuran pendaftaran, pemeriksaan fizikal pra-konsultasi wajib, atau ubat tambahan. Sebut harga akhir ditentukan sepenuhnya oleh doktor veterinar yang bertugas."
+      }
+    };
+
+    // =================================================================
+    // 2. REFINED DATA CONFIGURATION MATRIX
+    // =================================================================
+    const clinicPricing = {
+      cat: [
+        { 
+          nameEn: "Vaccination: Core Vaccine", 
+          nameBm: "Vaksinasi: Vaksin Teras", 
+          cost: "RM 65",
+          breakdownEn: ["Protects against: Parvovirus, Calicivirus, Herpesvirus, and Chlamydia"],
+          breakdownBm: ["Mencegah penyakit: Parvovirus, Calicivirus, Herpesvirus, dan Chlamydia"]
+        },
+        { 
+          nameEn: "Vaccination: Rabies Injection", 
+          nameBm: "Vaksinasi: Suntikan Rabies", 
+          cost: "RM 85",
+          breakdownEn: ["Protects against the deadly Rabies transmission virus"],
+          breakdownBm: ["Mencegah penularan virus Rabies yang membawa maut"]
+        },
+        {
+          nameEn: "✂️ Neutering Service",
+          nameBm: "✂️ Perkhidmatan Kembiri",
+          isNeuter: true,
+          labelEn: "3. Select Weight / Gender",
+          labelBm: "3. Pilih Anggaran Berat / Jantina",
+          placeholderEn: "-- Select Weight / Gender --",
+          placeholderBm: "-- Pilih Kategori Berat / Jantina --",
+          options: [
+            { nameEn: "Male Cat (< 5kg)", nameBm: "Kucing Jantan (< 5kg)", cost: "RM 130", breakdownEn: ["Procedure fee only", "Excludes additional checkup, medicine, or E-collar"], breakdownBm: ["Yuran prosedur pembedahan sahaja", "Tidak termasuk pemeriksaan, ubat balik, atau kolar pelindung"] },
+            { nameEn: "Male Cat (> 5kg)", nameBm: "Kucing Jantan (> 5kg)", cost: "RM 150", breakdownEn: ["Procedure fee only", "Excludes additional checkup, medicine, or E-collar"], breakdownBm: ["Yuran prosedur pembedahan sahaja", "Tidak termasuk pemeriksaan, ubat balik, atau kolar pelindung"] },
+            { 
+              nameEn: "Female Cat (All Weights)", 
+              nameBm: "Kucing Betina (Semua Berat)", 
+              cost: "Rates Below / Lihat Di Bawah", 
+              breakdownEn: ["🟢 Normal: RM 220", "🔥 On Heat: RM 250", "🚼 Early Pregnancy: RM 280", "⚠️ Pyometra (Womb Infection): RM 300 - RM 350", "*Prices are for surgery procedure fee only, excluding medicine/E-collar"],
+              breakdownBm: ["🟢 Normal: RM 220", "🔥 Biang / On Heat: RM 250", "🚼 Bunting Peringkat Awal: RM 280", "⚠️ Pyometra (Jangkitan Rahim): RM 300 - RM 350", "*Harga untuk yuran prosedur sahaja, tidak termasuk ubat/E-collar"]
+            }
+          ]
+        },
+        {
+          nameEn: "📦 Product Enquiry",
+          nameBm: "📦 Pertanyaan Produk",
+          isProductEnquiry: true,
+          labelEn: "3. Select Product",
+          labelBm: "3. Pilih Produk",
+          placeholderEn: "-- Choose a Product --",
+          placeholderBm: "-- Pilih Produk --",
+          options: [
+            { nameEn: "Premium Cat Kibbles (1.5kg)", nameBm: "Makanan Kucing Premium (1.5kg)", cost: "RM 45", breakdownEn: ["High protein formulation for adult cats", "Promotes digestive tract health & shiny coat"], breakdownBm: ["Formulasi protein tinggi untuk kucing dewasa", "Menjaga sistem pencernaan & bulu berkilat"] },
+            { nameEn: "Flea & Tick Treatment Spot-On", nameBm: "Ubat Titis Kutu Haiwan", cost: "RM 32", breakdownEn: ["Fast-acting liquid treatment applied to skin", "Kills adult fleas and ticks within 24 hours"], breakdownBm: ["Ubat cecair titis di leher belakang bertindak pantas", "Membunuh kutu dewasa dalam masa 24 jam"] }
+          ]
+        },
+        { 
+          nameEn: "General Consultation & Clinical Triage", 
+          nameBm: "Konsultasi Am & Triage Klinikal", 
+          cost: "Quote Required",
+          requiresQuote: true,
+          linkEn: "https://wa.me/60123456789?text=Hi%20Petpal%20Animal%20Clinic!%20%F0%9F%90%BE%20I%20would%20like%20to%20request%20a%20quotation%20for%20a%20consultation.%20Here%20are%20my%20pet's%20details%3A%0A%0A%2A1.%20PET%20IDENTITY%2A%0A-%20Name%3A%20%0A-%20Species%20%26%20Breed%3A%20Cat%20%2F%20%0A%0A%2A2.%20AGE%20%26%20WEIGHT%2A%0A-%20Age%20(Years%2FMonths)%3A%20%0A-%20Approx%20Weight%20(kg)%3A%20%0A%0A%2A3.%20CONDITION%20%26%20SYMPTOMS%2A%0A-%20Main%20Symptoms%3A%20%0A-%20Duration%20(How%20many%20days%3F)%3A%20%0A-%20Still%20eating%2Fdrinking%3F%20(Yes%2FNo)%3A%20%0A%0A%2A4.%20PREFERRED%20APPOINTMENT%2A%0A-%20Date%20%26%20Time%3A%20%0A%0AThank%20you!",
+          linkBm: "https://wa.me/60123456789?text=Hai%20Klinik%20Haiwan%20Petpal!%20%F0%9F%90%BE%20Saya%20ingin%20meminta%20sebut%20harga%20untuk%20konsultasi.%20Berikut%20adalah%20butiran%20haiwan%20saya%3A%0A%0A%2A1.%20IDENTITI%20HAIWAN%2A%0A-%20Nama%3A%20%0A-%20Jenis%20%26%20Baka%3A%20Kucing%20%2F%20%0A%0A%2A2.%20UMUR%20%26%20BERAT%2A%0A-%20Umur%20(Tahun%2FBulan)%3A%20%0A-%20Anggaran%20Berat%20(kg)%3A%20%0A%0A%2A3.%20GEJALA%20%26%20MASALAH%2A%0A-%20Gejala%20Utama%3A%20%0A-%20Tempoh%20(Berapa%20hari%3F)%3A%20%0A-%20Masih%20makan%2Fminum%3F%20(Ya%2FTidak)%3A%20%0A%0A%2A4.%20PILIHAN%20TEMUJANJI%2A%0A-%20Tarikh%20%26%20Masa%3A%20%0A%0ATerima%20kasih!"
+        }
+      ],
+      dog: [
+        { 
+          nameEn: "Vaccination: Core Vaccine (C6)", 
+          nameBm: "Vaksinasi: Vaksin Teras (C6)", 
+          cost: "RM 70",
+          breakdownEn: ["Protects against: Parvovirus, Adenovirus, Leptospira, Distemper, and Parainfluenza"],
+          breakdownBm: ["Mencegah penyakit: Parvovirus, Adenovirus, Leptospira, Distemper, dan Parainfluenza"]
+        },
+        { 
+          nameEn: "Vaccination: Rabies Injection", 
+          nameBm: "Vaksinasi: Suntikan Rabies", 
+          cost: "RM 85",
+          breakdownEn: ["Protects against the deadly Rabies transmission virus"],
+          breakdownBm: ["Mencegah penularan virus Rabies yang membawa maut"]
+        },
+        {
+          nameEn: "✂️ Neutering Service",
+          nameBm: "✂️ Perkhidmatan Kembiri",
+          isNeuter: true,
+          labelEn: "3. Select Weight / Gender",
+          labelBm: "3. Pilih Anggaran Berat / Jantina",
+          placeholderEn: "-- Select Weight / Gender --",
+          placeholderBm: "-- Pilih Kategori Berat / Jantina --",
+          options: [
+            { nameEn: "Male Dog (< 15kg)", nameBm: "Anjing Jantan (< 15kg)", cost: "RM 250", breakdownEn: ["Procedure fee only", "Excludes checkup/procedures/IV drip/medicine/E-collar"], breakdownBm: ["Yuran prosedur pembedahan sahaja", "Tidak termasuk pemeriksaan/IV drip/ubat/E-collar"] },
+            { nameEn: "Male Dog (15kg - 19.9kg)", nameBm: "Anjing Jantan (15kg - 19.9kg)", cost: "RM 300", breakdownEn: ["Procedure fee only", "Excludes checkup/procedures/IV drip/medicine/E-collar"], breakdownBm: ["Yuran prosedur pembedahan sahaja", "Tidak termasuk pemeriksaan/IV drip/ubat/E-collar"] },
+            { 
+              nameEn: "Female Dog (< 15kg)", 
+              nameBm: "Anjing Betina (< 15kg)", 
+              cost: "Rates Below / Lihat Di Bawah", 
+              breakdownEn: ["🟢 Normal: RM 400", "🔥 On Heat: RM 500", "🚼 Early Pregnancy: RM 600", "⚠️ Pyometra (Womb Infection): RM 650", "*Prices are for procedure fee only, excluding checkup/procedures/IV drip/medicine/E-collar"],
+              breakdownBm: ["🟢 Normal: RM 400", "🔥 Biang / On Heat: RM 500", "🚼 Bunting Peringkat Awal: RM 600", "⚠️ Pyometra (Jangkitan Rahim): RM 650", "*Harga untuk yuran prosedur sahaja, tidak termasuk pemeriksaan/prosedur/IV drip/ubat/E-collar"]
+            },
+            { 
+              nameEn: "Female Dog (15kg - 19.9kg)", 
+              nameBm: "Anjing Betina (15kg - 19.9kg)", 
+              cost: "Rates Below / Lihat Di Bawah", 
+              breakdownEn: ["🟢 Normal: RM 430", "🔥 On Heat: RM 530", "🚼 Early Pregnancy: RM 630", "⚠️ Pyometra (Womb Infection): RM 680", "*Prices are for procedure fee only, excluding checkup/procedures/IV drip/medicine/E-collar"],
+              breakdownBm: ["🟢 Normal: RM 430", "🔥 Biang / On Heat: RM 530", "🚼 Bunting Peringkat Awal: RM 630", "⚠️ Pyometra (Jangkitan Rahim): RM 680", "*Harga untuk yuran prosedur sahaja, tidak termasuk pemeriksaan/prosedur/IV drip/ubat/E-collar"]
+            }
+          ]
+        },
+        {
+          nameEn: "📦 Product Enquiry",
+          nameBm: "📦 Pertanyaan Produk",
+          isProductEnquiry: true,
+          labelEn: "3. Select Product",
+          labelBm: "3. Pilih Produk",
+          placeholderEn: "-- Choose a Product --",
+          placeholderBm: "-- Pilih Produk --",
+          options: [
+            { nameEn: "Medicated Skin Care Shampoo (500ml)", nameBm: "Sampu Kulit Terapeutik (500ml)", cost: "RM 58", breakdownEn: ["Anti-fungal & anti-bacterial active formula", "Relieves scratching and skin inflammation"], breakdownBm: ["Formula aktif anti-kulat dan anti-bakteria", "Melegakan kegatalan dan radang kulit"] },
+            { nameEn: "Tick Prevention Collar", nameBm: "Kolar Pencegah Kutu", cost: "RM 42", breakdownEn: ["Sustained release material formula", "Provides protection tracking up to 6 months"], breakdownBm: ["Bahan pelepasan perlahan berterusan", "Memberikan perlindungan perlindungan sehingga 6 bulan"] }
+          ]
+        },
+        { 
+          nameEn: "General Consultation & Clinical Triage", 
+          nameBm: "Konsultasi Am & Triage Klinikal", 
+          cost: "Quote Required",
+          requiresQuote: true,
+          linkEn: "https://wa.me/60123456789?text=Hi%20Petpal%20Animal%20Clinic!%20%F0%9F%90%BE%20I%20would%20like%20to%20request%20a%20quotation%20for%20a%20consultation.%20Here%20are%20my%20pet's%20details%3A%0A%0A%2A1.%20PET%20IDENTITY%2A%0A-%20Name%3A%20%0A-%20Species%20%26%20Breed%3A%20Dog%20%2F%20%0A%0A%2A2.%20AGE%20%26%20WEIGHT%2A%0A-%20Age%20(Years%2FMonths)%3A%20%0A-%20Approx%20Weight%20(kg)%3A%20%0A%0A%2A3.%20CONDITION%20%26%20SYMPTOMS%2A%0A-%20Main%20Symptoms%3A%20%0A-%20Duration%20(How%20many%20days%3F)%3A%20%0A-%20Still%20eating%2Fdrinking%3F%20(Yes%2FNo)%3A%20%0A%0A%2A4.%20PREFERRED%20APPOINTMENT%2A%0A-%20Date%20%26%20Time%3A%20%0A%0AThank%20you!",
+          linkBm: "https://wa.me/60123456789?text=Hai%20Klinik%20Haiwan%20Petpal!%20%F0%9F%90%BE%20Saya%20ingin%20meminta%20sebut%20harga%20untuk%20konsultasi.%20Berikut%20adalah%20butiran%20haiwan%20saya%3A%0A%0A%2A1.%20IDENTITI%20HAIWAN%2A%0A-%20Nama%3A%20%0A-%20Jenis%20%26%20Baka%3A%20Anjing%20%2F%20%0A%0A%2A2.%20UMUR%20%26%20BERAT%2A%0A-%20Umur%20(Tahun%2FBulan)%3A%20%0A-%20Anggaran%20Berat%20(kg)%3A%20%0A%0A%2A3.%20GEJALA%20%26%20MASALAH%2A%0A-%20Gejala%20Utama%3A%20%0A-%20Tempoh%20(Berapa%20hari%3F)%3A%20%0A-%20Masih%20makan%2Fminum%3F%20(Ya%2FTidak)%3A%20%0A%0A%2A4.%20PILIHAN%20TEMUJANJI%2A%0A-%20Tarikh%20%26%20Masa%3A%20%0A%0ATerima%20kasih!"
+        }
+      ]
+    };
+
+    // 3. APPLICATION RUNTIME ENGINE
+    function changeLanguage(lang) {
+      currentLang = lang;
+      const btnEn = document.getElementById('lang-en');
+      const btnBm = document.getElementById('lang-bm');
+      
+      if (lang === 'en') {
+        btnEn.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600";
+        btnBm.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800";
+      } else {
+        btnBm.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all bg-white shadow-sm text-blue-600";
+        btnEn.className = "px-3 py-1 text-xs font-bold rounded-lg transition-all text-slate-500 hover:text-slate-800";
+      }
+
+      // Translate core containers
+      document.getElementById('ui-title').innerHTML = translations[lang].title;
+      document.getElementById('ui-subtitle').innerHTML = translations[lang].subtitle;
+      document.getElementById('ui-step1').innerHTML = translations[lang].step1;
+      document.getElementById('ui-step2').innerHTML = translations[lang].step2;
+      document.getElementById('ui-step3').innerHTML = translations[lang].step3;
+      document.getElementById('ui-catText').innerHTML = translations[lang].catText;
+      document.getElementById('ui-dogText').innerHTML = translations[lang].dogText;
+      document.getElementById('ui-priceLabel').innerHTML = translations[lang].priceLabel;
+      document.getElementById('ui-bookingBtn').innerHTML = translations[lang].bookingBtn;
+      document.getElementById('ui-disclaimer').innerHTML = translations[lang].disclaimer;
+
+      if (selectedPetType) {
+        const serviceSelect = document.getElementById('serviceSelect');
+        const prevIndex = serviceSelect.value;
+        renderServiceDropdown(selectedPetType);
+        serviceSelect.value = prevIndex;
+        if (prevIndex !== "") handleMainServiceChange();
+      } else {
+        document.getElementById('ui-placeholder').textContent = translations[lang].placeholderEmpty;
+      }
+    }
+
+    function selectPet(type) {
+      selectedPetType = type;
+      document.getElementById('priceCard').classList.add('hidden');
+      document.getElementById('bookingAction').classList.add('hidden');
+      document.getElementById('breakdownCard').classList.add('hidden');
+      document.getElementById('subContainer').classList.add('hidden');
+
+      const catBtn = document.getElementById('btn-cat');
+      const dogBtn = document.getElementById('btn-dog');
+
+      if (type === 'cat') {
+        catBtn.className = "flex flex-col items-center justify-center p-4 border-2 border-blue-500 rounded-2xl bg-blue-50/50 text-blue-700 font-medium transition-all";
+        dogBtn.className = "flex flex-col items-center justify-center p-4 border-2 border-slate-200 rounded-2xl bg-white text-slate-700 font-medium transition-all hover:border-blue-500";
+      } else {
+        dogBtn.className = "flex flex-col items-center justify-center p-4 border-2 border-blue-500 rounded-2xl bg-blue-50/50 text-blue-700 font-medium transition-all";
+        catBtn.className = "flex flex-col items-center justify-center p-4 border-2 border-slate-200 rounded-2xl bg-white text-slate-700 font-medium transition-all hover:border-blue-500";
+      }
+
+      renderServiceDropdown(type);
+    }
+
+    function renderServiceDropdown(type) {
+      const dropdown = document.getElementById('serviceSelect');
+      dropdown.innerHTML = `<option value="">${translations[currentLang].placeholderActive}</option>`;
+      
+      clinicPricing[type].forEach((service, index) => {
+        let displayName = (currentLang === 'en') ? service.nameEn : service.nameBm;
+        let option = document.createElement('option');
+        option.value = index;
+        option.textContent = displayName;
+        dropdown.appendChild(option);
+      });
+
+      dropdown.disabled = false;
+      dropdown.className = "w-full p-3.5 border-2 border-slate-200 rounded-xl bg-white text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all";
+    }
+
+    function handleMainServiceChange() {
+      const dropdown = document.getElementById('serviceSelect');
+      const subContainer = document.getElementById('subContainer');
+      const priceCard = document.getElementById('priceCard');
+      const bookingAction = document.getElementById('bookingAction');
+      const breakdownCard = document.getElementById('breakdownCard');
+      const bookingBtn = document.getElementById('ui-bookingBtn');
+      const step3Label = document.getElementById('ui-step3');
+      const subSelect = document.getElementById('subSelect');
+
+      if (dropdown.value === "") {
+        priceCard.classList.add('hidden');
+        bookingAction.classList.add('hidden');
+        breakdownCard.classList.add('hidden');
+        subContainer.classList.add('hidden');
+        return;
+      }
+
+      const selectedService = clinicPricing[selectedPetType][dropdown.value];
+
+      // ROUTE 1: Neuter or Product Enquiry (Both require sub-selections)
+      if (selectedService.isNeuter || selectedService.isProductEnquiry) {
+        priceCard.classList.add('hidden');
+        bookingAction.classList.add('hidden');
+        breakdownCard.classList.add('hidden');
+        
+        step3Label.textContent = (currentLang === 'en') ? selectedService.labelEn : selectedService.labelBm;
+        subSelect.innerHTML = `<option value="">${(currentLang === 'en') ? selectedService.placeholderEn : selectedService.placeholderBm}</option>`;
+        
+        selectedService.options.forEach((opt, index) => {
+          let displayName = (currentLang === 'en') ? opt.nameEn : opt.nameBm;
+          let option = document.createElement('option');
+          option.value = index;
+          option.textContent = displayName;
+          subSelect.appendChild(option);
+        });
+
+        subContainer.classList.remove('hidden');
+      } 
+      // ROUTE 2: Consultation with Direct WhatsApp intake routing
+      else if (selectedService.requiresQuote) {
+        subContainer.classList.add('hidden');
+        priceCard.classList.add('hidden');
+        breakdownCard.classList.add('hidden');
+        
+        if (currentLang === 'en') {
+          bookingBtn.innerHTML = "💬 Please WhatsApp message for quotation";
+          bookingBtn.href = selectedService.linkEn;
+        } else {
+          bookingBtn.innerHTML = "💬 Sila mesej WhatsApp untuk sebut harga";
+          bookingBtn.href = selectedService.linkBm;
+        }
+        bookingAction.classList.remove('hidden');
+      } 
+      // ROUTE 3: Standard Fixed Item (e.g., Simple Vaccines)
+      else {
+        subContainer.classList.add('hidden');
+        renderFinalOutput(selectedService.cost, selectedService.breakdownEn, selectedService.breakdownBm);
+      }
+    }
+
+    function handleSubSelectionChange() {
+      const serviceDropdown = document.getElementById('serviceSelect');
+      const subDropdown = document.getElementById('subSelect');
+
+      if (subDropdown.value === "") {
+        document.getElementById('priceCard').classList.add('hidden');
+        document.getElementById('bookingAction').classList.add('hidden');
+        document.getElementById('breakdownCard').classList.add('hidden');
+        return;
+      }
+
+      const activeGroup = clinicPricing[selectedPetType][serviceDropdown.value].options;
+      const targetItem = activeGroup[subDropdown.value];
+
+      renderFinalOutput(targetItem.cost, targetItem.breakdownEn, targetItem.breakdownBm);
+    }
+
+    function renderFinalOutput(costValue, pointsEn, pointsBm) {
+      const priceCard = document.getElementById('priceCard');
+      const priceOutput = document.getElementById('priceOutput');
+      const bookingAction = document.getElementById('bookingAction');
+      const bookingBtn = document.getElementById('ui-bookingBtn');
+      const breakdownCard = document.getElementById('breakdownCard');
+      const breakdownList = document.getElementById('breakdownList');
+
+      priceOutput.textContent = costValue;
+      priceCard.className = "bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-center shadow-lg shadow-blue-600/20 mb-4 scale-100 transition-all duration-300";
+      
+      // Default booking template fallbacks
+      if (currentLang === 'en') {
+        bookingBtn.innerHTML = "💬 Tap here to Book Appointment on WhatsApp";
+        bookingBtn.href = "https://wa.me/60123456789?text=Hi%20Petpal,%20I%20just%20used%20your%20online%20price%20checker%20and%20would%20like%20to%20book%20an%20appointment!";
+      } else {
+        bookingBtn.innerHTML = "💬 Ketik di sini untuk Tempah Temujanji di WhatsApp";
+        bookingBtn.href = "https://wa.me/60123456789?text=Hai%20Petpal,%20saya%20baru%20sahaja%20menggunakan%20semakan%20harga%20talian%20dan%20ingin%20membuat%20temujanji!";
+      }
+      bookingAction.classList.remove('hidden');
+
+      const activeDetails = (currentLang === 'en') ? pointsEn : pointsBm;
+      if (activeDetails && activeDetails.length > 0) {
+        breakdownList.innerHTML = '';
+        activeDetails.forEach(item => {
+          let li = document.createElement('li');
+          li.textContent = item;
+          breakdownList.appendChild(li);
+        });
+        breakdownCard.classList.remove('hidden');
+      } else {
+        breakdownCard.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
       </div>
     </div>
 
